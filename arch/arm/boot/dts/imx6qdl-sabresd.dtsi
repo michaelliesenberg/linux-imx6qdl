@@ -246,7 +246,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc2_1>;
 	bus-width = <8>;
-	cd-gpios = <&gpio2 2 0>;
+	cd-gpios = <&gpio2 2 1>;
 	wp-gpios = <&gpio2 3 0>;
 	status = "okay";
 };
@@ -255,7 +255,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc3_1>;
 	bus-width = <8>;
-	cd-gpios = <&gpio2 0 0>;
+	cd-gpios = <&gpio2 0 1>;
 	wp-gpios = <&gpio2 1 0>;
 	status = "okay";
 };
