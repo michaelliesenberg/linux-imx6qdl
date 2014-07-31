@@ -109,6 +109,13 @@
 		reg = <0x20>;
 		interrupt-parent = <&gpio4>;
 		interrupts = <7 2>;
+		status = "disabled";
+	};
+};
+
+&i2c3 {										// ********** I2C 3 **********
+	tsc2004@49 {								// Touch controller TI TSC2014 (on Board)
+		status = "okay";
 	};
 };
 
