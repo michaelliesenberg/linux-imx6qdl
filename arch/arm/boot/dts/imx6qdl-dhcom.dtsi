@@ -201,10 +201,11 @@
 		interrupt-parent = <&gpio6>;
 		interrupts = <28 2>;
 		irq-gpios = <&gpio6 28 0>;
+		status = "disabled";
 	};
-	
+
 	/* Will be replaced, because there is a address conflict with the RTC
-	/* 
+	/*
 	eeprom@50 {							// EEPROM Microchip 24AA02E48T-I/OT
 		compatible = "atmel,24c02";
 		reg = <0x50>;
@@ -297,5 +298,5 @@
 	pinctrl-0 = <&pinctrl_usdhc4_1>;
 	non-removable;
 	bus-width = <8>;
-	status = "okay";
+	//status = "okay";						// TODO: Uncomment it when it works
 };
