@@ -57,9 +57,9 @@
 		fsl,weim-cs-timing = <0x00610089 0x00001002 0x1c022000
 				0x00000000 0x1C092480 0x00000000>;
 	};
-	
+/*	
 	uio_cfi2_uart0@0,0 {
-		compatible = "dh,cfi2-uart0";
+		compatible = "dh,cfi2-uart";
 		reg = <0 0x00004000 0x02000>;
 		reg-names = "cfi2_uart0";
 		#address-cells = <1>;
@@ -68,7 +68,7 @@
 	};
 	
 	uio_cfi2_uart1@0,0 {
-		compatible = "dh,cfi2-uart1";
+		compatible = "dh,cfi2-uart";
 		reg = <0 0x00006000 0x02000>;
 		reg-names = "cfi2_uart1";
 		#address-cells = <1>;
@@ -77,17 +77,17 @@
 	};
 	
 	uio_cfi2_uart2@0,0 {
-		compatible = "dh,cfi2-uart2";
+		compatible = "dh,cfi2-uart";
 		reg = <0 0x00008000 0x02000>;
 		reg-names = "cfi2_uart2";
 		#address-cells = <1>;
 		#size-cells = <1>;
 //		interrupts = <0 0 3>;
 	};
-	
+	*/
 };
 
-/*
+
 &iomuxc {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog>;
@@ -95,21 +95,25 @@
 	hog {
 		pinctrl_hog: hoggrp {
 			fsl,pins = <
-				MX6QDL_PAD_EIM_D27__GPIO3_IO27    0x80000000	// GPIO G -> Backlight Enable
-				MX6QDL_PAD_SD1_DAT3__PWM1_OUT     0x80000000	// PWM -> Backlight Enable
-				MX6QDL_PAD_KEY_ROW0__GPIO4_IO07   0x80000000	// GPIO H -> Touch Interrupt picoITX dh-touch
-				MX6QDL_PAD_DI0_PIN4__GPIO4_IO20   0x1b0b0	// GPIO F
-				MX6QDL_PAD_GPIO_4__GPIO1_IO04   0x80000000
-				MX6QDL_PAD_GPIO_5__GPIO1_IO05   0x80000000
-				MX6QDL_PAD_NANDF_D0__GPIO2_IO00 0x80000000
-				MX6QDL_PAD_NANDF_D1__GPIO2_IO01 0x80000000
-				MX6QDL_PAD_NANDF_D2__GPIO2_IO02 0x80000000
-				MX6QDL_PAD_NANDF_D3__GPIO2_IO03 0x80000000
-				MX6QDL_PAD_GPIO_0__CCM_CLKO1    0x130b0
+			        MX6QDL_PAD_GPIO_2__GPIO1_IO02    0x80000000 // GPIO A -> for tests
+			        MX6QDL_PAD_KEY_ROW1__GPIO4_IO09  0x80000000 // GPIO L -> Interrupt UART0
+			        MX6QDL_PAD_SD3_DAT5__GPIO7_IO00  0x80000000 // GPIO M -> Interrupt UART1
+			        MX6QDL_PAD_NANDF_CS1__GPIO6_IO14 0x80000000 // GPIO J -> Interrupt UART2
+/*				MX6QDL_PAD_EIM_D27__GPIO3_IO27   0x80000000	// GPIO G -> Backlight Enable
+				MX6QDL_PAD_SD1_DAT3__PWM1_OUT    0x80000000	// PWM -> Backlight Enable
+				MX6QDL_PAD_KEY_ROW0__GPIO4_IO07  0x80000000	// GPIO H -> Touch Interrupt picoITX dh-touch
+				MX6QDL_PAD_DI0_PIN4__GPIO4_IO20  0x1b0b0	// GPIO F
+				MX6QDL_PAD_GPIO_4__GPIO1_IO04    0x80000000
+				MX6QDL_PAD_GPIO_5__GPIO1_IO05    0x80000000
+				MX6QDL_PAD_NANDF_D0__GPIO2_IO00  0x80000000
+				MX6QDL_PAD_NANDF_D1__GPIO2_IO01  0x80000000
+				MX6QDL_PAD_NANDF_D2__GPIO2_IO02  0x80000000
+				MX6QDL_PAD_NANDF_D3__GPIO2_IO03  0x80000000
+				MX6QDL_PAD_GPIO_0__CCM_CLKO1     0x130b0
 				MX6QDL_PAD_NANDF_CLE__GPIO6_IO07 0x80000000
 				MX6QDL_PAD_ENET_TXD1__GPIO1_IO29 0x80000000
-				MX6QDL_PAD_EIM_D22__GPIO3_IO22  0x80000000
+				MX6QDL_PAD_EIM_D22__GPIO3_IO22   0x80000000*/
 			>;
 		};
 	};
-};*/
+};
