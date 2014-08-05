@@ -52,9 +52,7 @@
 
 #define DRIVER_NAME 	"uio_cfi2_main"
 
-#define GPMC_BASE 	0x6e000000
-
-#define MYFPGA_BASE1    0x01000000
+#define MYFPGA_BASE1    0x08000000
 #define MYFPGA_SIZE     0x00020000 /* 16 bit address space */
 
 #define ADDROFF_GENERAL 0x00000000
@@ -65,15 +63,12 @@
 #define SIZE_MUXFPGA	0x00000100
 
 
-#define PADS_SPI1BASE	0x480021C8
-#define	PADS_SPI1SIZE	0x0000000A
-
-
 struct uio_platdata {
 	struct uio_info *uioinfo;
+	struct platform_device *pdev;
 };
 
-
+#ifndef CONFIG_OF
 static struct resource cfi2_fpga_resources[] = {
     {
         .start = MYFPGA_BASE1 + ADDROFF_GENERAL,
@@ -93,14 +88,7 @@ static struct resource cfi2_fpga_resources[] = {
         .name  = "cfi2_mux",
         .flags = IORESOURCE_MEM
     },
-    {
-        .start = PADS_SPI1BASE,
-        .end   = PADS_SPI1BASE + PADS_SPI1SIZE - 1,
-        .name  = "cfi2_spi1_pads",
-        .flags = IORESOURCE_MEM
-    }
 };
-
 
 static struct uio_info cfi2_fpga_uio_info = {
    .name = DRIVER_NAME,
@@ -108,28 +96,45 @@ static struct uio_info cfi2_fpga_uio_info = {
    .irq = 0,
    .irq_flags = IRQF_TRIGGER_NONE,
 };
+#endif
 
 static int uio_cfi2_fpga_probe(struct platform_device *pdev)
 {
-	struct uio_info *uioinfo = pdev->dev.platform_data;
+	struct uio_info *uioinfo = dev_get_platdata(&pdev->dev);
 	struct uio_platdata *pdata;
 	struct uio_mem *uiomem;
 	int ret = -ENODEV;
 	int i;
 
+	if (pdev->dev.of_node) {
+	
+		/* alloc uioinfo for one device */
+		uioinfo = devm_kzalloc(&pdev->dev, sizeof(*uioinfo),
+				       GFP_KERNEL);
+		if (!uioinfo) {
+			dev_err(&pdev->dev, "unable to kmalloc\n");
+			return -ENOMEM;
+		}
+		uioinfo->name = pdev->dev.of_node->name;
+		dev_dbg(&pdev->dev, "name: %s\n", uioinfo->name);
+		uioinfo->version = "devicetree";
+		
+		/* Multiple IRQs are not supported */
+	}
+	
 	if (!uioinfo || !uioinfo->name || !uioinfo->version) {
 		dev_dbg(&pdev->dev, "%s: err_uioinfo\n", __func__);
-		goto err_uioinfo;
+		return ret;
 	}
-
-	pdata = kzalloc(sizeof(*pdata), GFP_KERNEL);
+        
+	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
 	if (!pdata) {
-		ret = -ENOMEM;
-		dev_dbg(&pdev->dev, "%s: err_alloc_pdata\n", __func__);
-		goto err_alloc_pdata;
+		dev_err(&pdev->dev, "unable to kmalloc\n");
+		return -ENOMEM;
 	}
 
 	pdata->uioinfo = uioinfo;
+	pdata->pdev = pdev;
 
 	uiomem = &uioinfo->mem[0];
 
@@ -150,6 +155,9 @@ static int uio_cfi2_fpga_probe(struct platform_device *pdev)
 		uiomem->addr = r->start;
 		uiomem->size = resource_size(r);
 		uiomem->name = r->name;
+		
+		dev_dbg(&pdev->dev, "uiomem setup: %s\n", uiomem->name);
+		
 		++uiomem;
 	}
 
@@ -160,16 +168,19 @@ static int uio_cfi2_fpga_probe(struct platform_device *pdev)
 
 	pdata->uioinfo->priv = pdata;
 
-	ret = uio_register_device(&pdev->dev, pdata->uioinfo);
+        pm_runtime_enable(&pdev->dev);
 
+	ret = uio_register_device(&pdev->dev, pdata->uioinfo);
 	if (ret) {
 		kfree(pdata);
-err_alloc_pdata:
-err_uioinfo:
+                dev_dbg(&pdev->dev, "uio_cfi2_fpga_probe() ERROR!\n");
+                pm_runtime_disable(&pdev->dev);
 		return ret;
 	}
 
 	platform_set_drvdata(pdev, pdata);
+	
+	dev_dbg(&pdev->dev, "uio_cfi2_fpga_probe() SUCCESS!\n");
 
 	return 0;
 }
@@ -182,52 +193,79 @@ static int uio_cfi2_fpga_remove(struct platform_device *pdev)
 	return 0;
 }
 
+static int uio_cfi2_fpga_runtime_nop(struct device *dev)
+{
+	/* Runtime PM callback shared between ->runtime_suspend()
+	 * and ->runtime_resume(). Simply returns success.
+	 *
+	 * In this driver pm_runtime_get_sync() and pm_runtime_put_sync()
+	 * are used at open() and release() time. This allows the
+	 * Runtime PM code to turn off power to the device while the
+	 * device is unused, ie before open() and after release().
+	 *
+	 * This Runtime PM callback does not need to save or restore
+	 * any registers since user space is responsbile for hardware
+	 * register reinitialization after open().
+	 */
+	return 0;
+}
+
+static const struct dev_pm_ops uio_cfi2_fpga_dev_pm_ops = {
+	.runtime_suspend = uio_cfi2_fpga_runtime_nop,
+	.runtime_resume = uio_cfi2_fpga_runtime_nop,
+};
+
+#ifdef CONFIG_OF
+static struct of_device_id uio_of_cfi2_fpga_match[] = {
+	{ .compatible = "dh,cfi2-main" },
+	{ /* Sentinel */ },
+};
+MODULE_DEVICE_TABLE(of, uio_of_cfi2_fpga_match);
+module_param_string(of_id, uio_of_cfi2_fpga_match[0].compatible, 128, 0);
+MODULE_PARM_DESC(of_id, "Openfirmware id of the device to be handled by uio");
+#endif
+
 static struct platform_driver uio_cfi2_fpga_driver = {
 	 .probe = uio_cfi2_fpga_probe,
 	 .remove = uio_cfi2_fpga_remove,
  	 .driver = {
 		.name = DRIVER_NAME,
 		.owner = THIS_MODULE,
+		.pm = &uio_cfi2_fpga_dev_pm_ops,
+		.of_match_table = of_match_ptr(uio_of_cfi2_fpga_match),
 	},
 
  };
-
+ 
+#ifndef CONFIG_OF
 static struct platform_device *cfi2_fpga_uio_pdev;
+#endif
 
 static int __init cfi2_init_module(void)
 {
-    void __iomem *io;
-
-    io = ioremap((unsigned long)GPMC_BASE , 0xB0);
-
-    /* setup CS1 for fpga access */
-    writel(0x00001210, io + 0x90);
-    writel(0x00090903, io + 0x94);
-    writel(0x00808002, io + 0x98);
-    writel(0x06040603, io + 0x9c);
-    writel(0x01070707, io + 0xa0);
-    writel(0x87030200, io + 0xa4);
-    writel(0x00000f41, io + 0xa8);
-
-    /* register memory mapping */
+#ifndef CONFIG_OF
+    /* register platform device */
     cfi2_fpga_uio_pdev = platform_device_register_resndata (NULL,
                                                          DRIVER_NAME,
                                                          -1,
                                                          cfi2_fpga_resources,
-                                                         4,
+                                                         3,
                                                          &cfi2_fpga_uio_info,
                                                          sizeof(struct uio_info)
                                                         );
     if (IS_ERR(cfi2_fpga_uio_pdev)) {
         return PTR_ERR(cfi2_fpga_uio_pdev);
     }
+#endif
 
     return platform_driver_register(&uio_cfi2_fpga_driver);
 }
 
 static void __exit cfi2_exit_module(void)
 {
+#ifndef CONFIG_OF
     platform_device_unregister(cfi2_fpga_uio_pdev);
+#endif
     platform_driver_unregister(&uio_cfi2_fpga_driver);
 }
 
