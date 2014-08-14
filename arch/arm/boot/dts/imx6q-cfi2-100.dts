@@ -17,7 +17,3 @@
 	model = "Freescale i.MX6 Quad DHCOM CFI2-100";
 	compatible = "fsl,imx6q-cfi2-100", "fsl,imx6q";
 };
-
-&sata {
-	status = "okay";
-};
