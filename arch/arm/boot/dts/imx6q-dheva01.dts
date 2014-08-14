@@ -17,7 +17,3 @@
 	model = "Freescale i.MX6 Quad DHCOM Premium Developer Kit";
 	compatible = "fsl,imx6q-dheva01", "fsl,imx6q";
 };
-
-&sata {
-	status = "okay";
-};
