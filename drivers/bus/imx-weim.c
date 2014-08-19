@@ -123,6 +123,7 @@ static int __init weim_timing_setup(struct device_node *np, void __iomem *base,
 	if (ret)
 		return ret;
 		
+	printk("[weim] *** %s ***\n", np->name );
 	printk("[weim] CS: %d\n", cs_idx);
 
 	if (cs_idx >= devtype->cs_count)
