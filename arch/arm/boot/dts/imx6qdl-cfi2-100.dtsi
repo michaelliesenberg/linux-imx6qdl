@@ -50,52 +50,52 @@
 	#size-cells = <1>;
 	/* it is necessary to setup 2x 64MB otherwise setting gpr fails */
 	ranges = <0 0  0x08000000  0x04000000>, // Chipselect A -> CFI2 FPGA
-                 <1 0  0x0c000000  0x04000000>; // Chipselect B -> CFI2 FPGA
-        fsl,weim-cs-gpr = <&gpr>;
-	status = "okay"; 
+		 <1 0  0x0c000000  0x04000000>; // Chipselect B -> CFI2 FPGA
+	fsl,weim-cs-gpr = <&gpr>;
+	status = "okay";
 
 	uio_cfi2_main@0,0 {
 		compatible = "dh,cfi2-main";
 		reg = <0 0x00000000 0x02000>,
 		      <0 0x00002000 0x02000>,
 		      <0 0x0000a000 0x01000>;
-		reg-names = "cfi2_general", "cfi2_misc",
-                             "cfi2_mux";
+		reg-names = "cfi2_general", "cfi2_misc", "cfi2_mux";
 		#address-cells = <1>;
 		#size-cells = <1>;
 		fsl,weim-cs-timing = <0x00610089 0x00001002 0x1c022000
-				0x00000000 0x1C092480 0x00000000>;
+				      0x00000000 0x1C092480 0x00000000>;
 	};
-/*	
+
 	uio_cfi2_uart0@0,0 {
-		compatible = "dh,cfi2-uart";
+		compatible = "dh,cfi2-uart0";
 		reg = <0 0x00004000 0x02000>;
 		reg-names = "cfi2_uart0";
 		#address-cells = <1>;
 		#size-cells = <1>;
-//		interrupts = <0 0 3>;
+		fsl,weim-cs-timing = <0x00610089 0x00001002 0x1c022000
+				      0x00000000 0x1C092480 0x00000000>;
 	};
-	
+
 	uio_cfi2_uart1@0,0 {
-		compatible = "dh,cfi2-uart";
+		compatible = "dh,cfi2-uart1";
 		reg = <0 0x00006000 0x02000>;
 		reg-names = "cfi2_uart1";
 		#address-cells = <1>;
 		#size-cells = <1>;
-//		interrupts = <0 0 3>;
+		fsl,weim-cs-timing = <0x00610089 0x00001002 0x1c022000
+				      0x00000000 0x1C092480 0x00000000>;
 	};
-	
+
 	uio_cfi2_uart2@0,0 {
-		compatible = "dh,cfi2-uart";
+		compatible = "dh,cfi2-uart2";
 		reg = <0 0x00008000 0x02000>;
 		reg-names = "cfi2_uart2";
 		#address-cells = <1>;
 		#size-cells = <1>;
-//		interrupts = <0 0 3>;
+		fsl,weim-cs-timing = <0x00610089 0x00001002 0x1c022000
+				      0x00000000 0x1C092480 0x00000000>;
 	};
-	*/
 };
-
 
 &iomuxc {
 	pinctrl-names = "default";
