@@ -224,6 +224,10 @@
 	};*/
 };
 
+&weim {									// Memory interface is not active by default
+	status = "disable"; 
+};
+
 &iomuxc {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog>;

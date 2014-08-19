@@ -1,6 +1,6 @@
-/* uio_cfi2_uart0:
+/* uio_cfi2_uart2:
 	UIO driver to access the cfi2 fpga with multiple uart implementations
-	-> this uio driver is to have access to uart0 and the corresponding interrupt line
+	-> this uio driver is to have access to uart2 and the corresponding interrupt line
 	-> this driver can only be used in combination with the uio_cfi2_main driver
 
    Copyright (C) 2013 DH electronics GmbH
@@ -126,7 +126,7 @@ static irqreturn_t cfi2_uart2_irqhandler(int irq, struct uio_info *info)
 	return IRQ_HANDLED;
 }
 
-//#ifndef CONFIG_OF
+#ifndef CONFIG_OF
 static struct resource cfi2_uart2_fpga_resources[] = {
     {
         .start = MYFPGA_BASE1 + ADDROFF_UART2,
@@ -145,7 +145,7 @@ static struct uio_info cfi2_uart2_uio_info = {
    .handler = cfi2_uart2_irqhandler,
    .irqcontrol = cfi2_uart2_irqcontrol,
 };
-//#endif
+#endif
 
 static int uio_cfi2_fpga_probe(struct platform_device *pdev)
 {
@@ -154,6 +154,8 @@ static int uio_cfi2_fpga_probe(struct platform_device *pdev)
 	struct uio_mem *uiomem;
 	int ret = -ENODEV;
 	int i;
+	int rc;
+	int irq;
 
 	if (pdev->dev.of_node) {
 	
@@ -169,6 +171,37 @@ static int uio_cfi2_fpga_probe(struct platform_device *pdev)
 		uioinfo->version = "devicetree";
 		
 		/* Multiple IRQs are not supported */
+		rc = gpio_request(DHCOM_GPIOJ, uioinfo->name);
+		if (rc) {
+			printk("Failed to request gpio: %d\n", rc);
+		}
+
+		rc = gpio_direction_input(DHCOM_GPIOJ);
+		if (rc) {
+			printk("Failed to get gpio as input: %d\n", rc);
+			gpio_free(DHCOM_GPIOJ);
+		}
+
+#ifdef ADDR_UART2_INT_REG
+		/* get io remap to int enable register */
+		io_int_reg = ioremap((unsigned long)ADDR_UART2_INT_REG , 0x01);
+		/* disable irq */
+		writew(0x0000, io_int_reg);
+#endif
+
+		irq = gpio_to_irq(DHCOM_GPIOJ);
+		if (irq <= 0) {
+			printk("Failed to get gpio as irq: %d\n", irq);
+			gpio_free(DHCOM_GPIOJ);
+		}
+		spin_lock_init(&cfi2_uart2_lock);
+
+		cfi2_uart2_flags = 0; /* interrupt is enabled to begin with */
+
+		uioinfo->irq = irq;
+		uioinfo->irq_flags = IRQF_TRIGGER_HIGH;
+		uioinfo->handler = cfi2_uart2_irqhandler;
+		uioinfo->irqcontrol = cfi2_uart2_irqcontrol;
 	}
 	
 	if (!uioinfo || !uioinfo->name || !uioinfo->version) {
@@ -263,7 +296,7 @@ static const struct dev_pm_ops uio_cfi2_fpga_dev_pm_ops = {
 	.runtime_suspend = uio_cfi2_fpga_runtime_nop,
 	.runtime_resume = uio_cfi2_fpga_runtime_nop,
 };
-/*
+
 #ifdef CONFIG_OF
 static struct of_device_id uio_of_cfi2_uart2_match[] = {
 	{ .compatible = "dh,cfi2-uart2" },
@@ -274,7 +307,7 @@ MODULE_DEVICE_TABLE(of, uio_of_cfi2_uart2_match);
 module_param_string(of_id, uio_of_cfi2_uart2_match[0].compatible, 128, 0);
 MODULE_PARM_DESC(of_id, "Openfirmware id of the device to be handled by uio");
 #endif
-*/
+
 static struct platform_driver uio_cfi2_fpga_driver = {
 	 .probe = uio_cfi2_fpga_probe,
 	 .remove = uio_cfi2_fpga_remove,
@@ -282,19 +315,19 @@ static struct platform_driver uio_cfi2_fpga_driver = {
 		.name = DRIVER_NAME,
 		.owner = THIS_MODULE,
 		.pm = &uio_cfi2_fpga_dev_pm_ops,
-		//.of_match_table = of_match_ptr(uio_of_cfi2_uart2_match),
+		.of_match_table = of_match_ptr(uio_of_cfi2_uart2_match),
 	},
 
  };
 
-//#ifndef CONFIG_OF
+#ifndef CONFIG_OF
 static struct platform_device *cfi2_uart2_uio_pdev;
-//#endif
+#endif
 
 
 static int __init cfi2_uart2_init_module(void)
 {
-//#ifndef CONFIG_OF 
+#ifndef CONFIG_OF 
     int rc;
     int irq;
 
@@ -339,15 +372,16 @@ static int __init cfi2_uart2_init_module(void)
     if (IS_ERR(cfi2_uart2_uio_pdev)) {
         return PTR_ERR(cfi2_uart2_uio_pdev);
     }
-//#endif
+#endif
     return platform_driver_register(&uio_cfi2_fpga_driver);
 }
 
 static void __exit cfi2_uart2_exit_module(void)
 {
-//#ifndef CONFIG_OF
+#ifndef CONFIG_OF
     platform_device_unregister(cfi2_uart2_uio_pdev);
-//#endif
+    iounmap(io_int_reg);
+#endif
     platform_driver_unregister(&uio_cfi2_fpga_driver);
 }
 
