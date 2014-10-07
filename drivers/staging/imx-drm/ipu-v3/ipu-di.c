@@ -223,7 +223,7 @@ static int clk_di_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	div = ipu_di_clk_calc_div(parent_rate, rate);
 
-	ipu_di_write(di, clkgen0 | div, DI_BS_CLKGEN0);
+	ipu_di_write(di, clkgen0 | div | (0x1 << 16), DI_BS_CLKGEN0);
 
 	dev_dbg(di->ipu->dev, "%s: inrate: %ld desired: %ld div: 0x%08x\n",
 			__func__, parent_rate, rate, div);
