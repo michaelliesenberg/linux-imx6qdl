@@ -878,6 +878,15 @@ static int esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
 	return esdhc_change_pinstate(host, uhs);
 }
 
+unsigned int esdhc_get_max_timeout(struct sdhci_host *host)
+{
+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+	u32 max_to = esdhc_is_usdhc(imx_data) ? 1 << 28 : 1 << 27;
+
+	return max_to / (esdhc_pltfm_get_max_clock(host) / 1000);
+}
+
 static struct sdhci_ops sdhci_esdhc_ops = {
 	.read_l = esdhc_readl_le,
 	.read_w = esdhc_readw_le,
@@ -890,6 +899,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
 	.get_ro = esdhc_pltfm_get_ro,
 	.platform_bus_width = esdhc_pltfm_bus_width,
 	.set_uhs_signaling = esdhc_set_uhs_signaling,
+	.get_max_timeout = esdhc_get_max_timeout,
 };
 
 static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
