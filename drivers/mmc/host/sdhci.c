@@ -1153,14 +1153,14 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
 	unsigned long timeout;
 
 	if (clock && clock == host->clock)
-		return;
+		goto out;
 
 	host->mmc->actual_clock = 0;
 
 	if (host->ops->set_clock) {
 		host->ops->set_clock(host, clock);
 		if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
-			return;
+			goto out;
 	}
 
 	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
@@ -1259,6 +1259,19 @@ clock_set:
 
 out:
 	host->clock = clock;
+
+	/* update timeout_clk and max_discard_to once the SDCLK is changed */
+	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK && clock) {
+		host->timeout_clk = host->mmc->actual_clock ?
+					host->mmc->actual_clock / 1000 :
+					host->clock / 1000;
+		if (host->ops->get_max_timeout)
+			host->mmc->max_discard_to =
+					host->ops->get_max_timeout(host);
+		else
+			host->mmc->max_discard_to = (1 << 27) /
+					host->timeout_clk;
+	}
 }
 
 static inline void sdhci_update_clock(struct sdhci_host *host)
@@ -2950,10 +2963,12 @@ int sdhci_add_host(struct sdhci_host *host)
 	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
 		host->timeout_clk = mmc->f_max / 1000;
 
-	if (host->ops->get_max_timeout)
-		mmc->max_discard_to = host->ops->get_max_timeout(host);
-	else
-		mmc->max_discard_to = (1 << 27) / host->timeout_clk;
+	if (!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
+		if (host->ops->get_max_timeout)
+			mmc->max_discard_to = host->ops->get_max_timeout(host);
+		else
+			mmc->max_discard_to = (1 << 27) / host->timeout_clk;
+	}
 
 	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
 
