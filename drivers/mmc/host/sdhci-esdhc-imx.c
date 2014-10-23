@@ -884,7 +884,8 @@ unsigned int esdhc_get_max_timeout(struct sdhci_host *host)
 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
 	u32 max_to = esdhc_is_usdhc(imx_data) ? 1 << 28 : 1 << 27;
 
-	return max_to / (esdhc_pltfm_get_max_clock(host) / 1000);
+	return host->mmc->actual_clock ?
+			max_to / (host->mmc->actual_clock / 1000) : 0;
 }
 
 void esdhc_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
