@@ -289,6 +289,7 @@
 	pinctrl-0 = <&pinctrl_usdhc2_2>;
 	cd-gpios = <&gpio6 16 0>;
 	fsl,wp-controller;
+	keep-power-in-suspend;
 	status = "okay";
 };
 
@@ -297,6 +298,7 @@
 	pinctrl-0 = <&pinctrl_usdhc3_2>;
 	cd-gpios = <&gpio7 8 1>;
 	fsl,wp-controller;
+	keep-power-in-suspend;
 	status = "okay";
 };
 
@@ -306,5 +308,6 @@
 	non-removable;
 	bus-width = <8>;
 	no-1-8-v;
+	keep-power-in-suspend;
 	status = "okay";
 };
