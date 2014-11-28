@@ -26,11 +26,11 @@
 #include "imx-drm.h"
 
 #define MAX_CONNECTOR		4
-#define PREFERRED_BPP		16
+#define PREFERRED_BPP		32
 
 static struct drm_fbdev_cma *fbdev_cma;
 
-static int legacyfb_depth = 16;
+static int legacyfb_depth = 32;
 
 module_param(legacyfb_depth, int, 0444);
 
