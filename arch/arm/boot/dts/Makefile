@@ -154,6 +154,7 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx53-qsb.dtb \
 	imx53-smd.dtb \
 	imx6dl-cfi2-100.dtb \
+	imx6dl-cfi2-200.dtb \
 	imx6dl-dheva01.dtb \
 	imx6dl-cubox-i.dtb \
 	imx6dl-hummingboard.dtb \
@@ -161,6 +162,7 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6dl-sabresd.dtb \
 	imx6dl-wandboard.dtb \
 	imx6q-cfi2-100.dtb \
+	imx6q-cfi2-200.dtb \
 	imx6q-dheva01.dtb \
 	imx6q-arm2.dtb \
 	imx6q-cubox-i.dtb \
