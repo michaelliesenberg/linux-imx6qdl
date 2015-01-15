@@ -15,5 +15,5 @@
 
 / {
 	model = "Freescale i.MX6 DualLite DHCOM Premium Developer Kit";
-	compatible = "fsl,imx6dl-dheva01.dtsi", "fsl,imx6dl";
+	compatible = "fsl,imx6dl-dheva01", "fsl,imx6dl";
 };
