@@ -173,6 +173,7 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6q-sbc6x.dtb \
 	imx6q-udoo.dtb \
 	imx6q-wandboard.dtb \
+	imx6s-dheva01.dtb \
 	imx6sl-evk.dtb \
 	vf610-cosmic.dtb \
 	vf610-twr.dtb
