@@ -102,6 +102,12 @@
 			};
 		};
 	};
+
+	lvds-channel@1 {
+		fsl,data-mapping = "spwg";
+		fsl,data-width = <24>;
+		status = "okay";
+	};
 };
 
 &pwm1 {										// Backlight PWM
