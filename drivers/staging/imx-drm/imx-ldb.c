@@ -19,6 +19,7 @@
  */
 
 #include <linux/module.h>
+#include <linux/moduleparam.h>
 #include <linux/clk.h>
 #include <drm/drmP.h>
 #include <drm/drm_fb_helper.h>
@@ -52,6 +53,13 @@
 
 #define con_to_imx_ldb_ch(x) container_of(x, struct imx_ldb_channel, connector)
 #define enc_to_imx_ldb_ch(x) container_of(x, struct imx_ldb_channel, encoder)
+
+#define TIMINGS_MAX_SIZE 20
+static char *timings0[TIMINGS_MAX_SIZE] =  { [0 ... (TIMINGS_MAX_SIZE-1)] = NULL };
+static char *timings1[TIMINGS_MAX_SIZE] =  { [0 ... (TIMINGS_MAX_SIZE-1)] = NULL };
+static int timings_actual_size[2] = { 0, 0 };
+module_param_array(timings0, charp, &timings_actual_size[0], S_IRUGO);
+module_param_array(timings1, charp, &timings_actual_size[1], S_IRUGO);
 
 struct imx_ldb;
 
@@ -470,6 +478,7 @@ static int imx_ldb_probe(struct platform_device *pdev)
 	int datawidth;
 	int mapping;
 	int dual;
+	int property_value;
 	int ret;
 	int i;
 
@@ -489,6 +498,12 @@ static int imx_ldb_probe(struct platform_device *pdev)
 		imx_ldb->lvds_mux = of_id->data;
 
 	dual = of_property_read_bool(np, "fsl,dual-channel");
+
+	/* Overwrite device tree value only if bootags available and DUAL is defined */
+	property_value = (int)bootargs_get_property_value( timings0, timings_actual_size[0], "DUAL", (-1) );
+	if( (timings_actual_size[0] != 0) && (property_value >= 0 ) )
+		dual = property_value;
+
 	if (dual)
 		imx_ldb->ldb_ctrl |= LDB_SPLIT_MODE_EN;
 
@@ -537,9 +552,21 @@ static int imx_ldb_probe(struct platform_device *pdev)
 			channel->edid = kmemdup(edidp, channel->edid_len,
 						GFP_KERNEL);
 		} else {
-			ret = of_get_drm_display_mode(child, &channel->mode, 0);
-			if (!ret)
-				channel->mode_valid = 1;
+			if( timings_actual_size[i] != 0 ) { /* Get display timings from bootargs */
+				printk("LVDS(%d%s) display timings from bootargs (#%d):\n", i, dual ? "+1" : "", timings_actual_size[i] );
+				if( i == 0 )
+					ret = bootargs_get_drm_display_mode(timings0, timings_actual_size[i], &channel->mode);
+				if( i == 1 )
+					ret = bootargs_get_drm_display_mode(timings1, timings_actual_size[i], &channel->mode);
+				if (!ret)
+					channel->mode_valid = 1;
+			}
+			else {
+				printk("LVDS(%d%s) display timings from device tree %s:\n", i, dual ? "+1" : "", of_node_full_name(child));
+				ret = of_get_drm_display_mode(child, &channel->mode, 0);
+				if (!ret)
+					channel->mode_valid = 1;
+			}
 		}
 
 		ret = of_property_read_u32(child, "fsl,data-width", &datawidth);
