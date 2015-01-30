@@ -19,6 +19,7 @@
  */
 
 #include <linux/module.h>
+#include <linux/moduleparam.h>
 #include <drm/drmP.h>
 #include <drm/drm_fb_helper.h>
 #include <drm/drm_crtc_helper.h>
@@ -29,6 +30,11 @@
 
 #define con_to_imxpd(x) container_of(x, struct imx_parallel_display, connector)
 #define enc_to_imxpd(x) container_of(x, struct imx_parallel_display, encoder)
+
+#define TIMINGS_MAX_SIZE 20
+static char *timings[TIMINGS_MAX_SIZE] = { [0 ... (TIMINGS_MAX_SIZE-1)] = NULL };
+static int timings_actual_size = 0;
+module_param_array(timings, charp, &timings_actual_size, S_IRUGO);
 
 struct imx_parallel_display {
 	struct drm_connector connector;
@@ -60,6 +66,18 @@ static int imx_pd_connector_get_modes(struct drm_connector *connector)
 	struct device_node *np = imxpd->dev->of_node;
 	int num_modes = 0;
 
+	/* Get display timings from bootargs */
+	if( timings_actual_size != 0 ) {
+		struct drm_display_mode *mode = drm_mode_create(connector->dev);
+		printk("Parallel display timings from bootargs (#%d):\n", timings_actual_size );
+		bootargs_get_drm_display_mode(timings, timings_actual_size, &imxpd->mode);
+		drm_mode_copy(mode, &imxpd->mode);
+		mode->type |= DRM_MODE_TYPE_DRIVER | DRM_MODE_TYPE_PREFERRED,
+		drm_mode_probed_add(connector, mode);
+		num_modes++;
+		return num_modes; /* We are through */
+	}
+
 	if (imxpd->edid) {
 		drm_mode_connector_update_edid_property(connector, imxpd->edid);
 		num_modes = drm_add_edid_modes(connector, imxpd->edid);
@@ -75,6 +93,7 @@ static int imx_pd_connector_get_modes(struct drm_connector *connector)
 
 	if (np) {
 		struct drm_display_mode *mode = drm_mode_create(connector->dev);
+		printk("Parallel display timings from device tree %s:\n", of_node_full_name(np));
 		of_get_drm_display_mode(np, &imxpd->mode, OF_USE_NATIVE_MODE);
 		drm_mode_copy(mode, &imxpd->mode);
 		mode->type |= DRM_MODE_TYPE_DRIVER | DRM_MODE_TYPE_PREFERRED,
