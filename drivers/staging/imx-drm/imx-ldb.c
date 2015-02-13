@@ -563,6 +563,12 @@ static int imx_ldb_probe(struct platform_device *pdev)
 			}
 			else {
 				printk("LVDS(%d%s) display timings from device tree %s:\n", i, dual ? "+1" : "", of_node_full_name(child));
+
+				if( of_get_child_by_name( child, "display-timings" ) == NULL ) {
+					printk("  => no timings specified\n");
+					continue;
+				}
+
 				ret = of_get_drm_display_mode(child, &channel->mode, 0);
 				if (!ret)
 					channel->mode_valid = 1;
