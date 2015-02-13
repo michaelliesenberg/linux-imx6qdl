@@ -82,7 +82,9 @@
 		fsl,data-width = <24>;
 		status = "okay";
 
-		display-timings {
+		// Set your LVDS display timings here 
+		// To Avoid interference comment the parallel display timings out
+	/*	display-timings {						
 			// DH display ID 10
 			LG_7inch_LB070WV8 {
 				dh-display-ID = "010";
@@ -100,7 +102,7 @@
 				de-active = <1>;
 				pixelclk-active = <0>;
 			};
-		};
+		};*/
 	};
 
 	lvds-channel@1 {
