@@ -57,9 +57,9 @@
 #define TIMINGS_MAX_SIZE 20
 static char *timings0[TIMINGS_MAX_SIZE] =  { [0 ... (TIMINGS_MAX_SIZE-1)] = NULL };
 static char *timings1[TIMINGS_MAX_SIZE] =  { [0 ... (TIMINGS_MAX_SIZE-1)] = NULL };
-static int timings_actual_size[2] = { 0, 0 };
-module_param_array(timings0, charp, &timings_actual_size[0], S_IRUGO);
-module_param_array(timings1, charp, &timings_actual_size[1], S_IRUGO);
+static int size_bootarg_timings[2] = { 0, 0 };
+module_param_array(timings0, charp, &size_bootarg_timings[0], S_IRUGO);
+module_param_array(timings1, charp, &size_bootarg_timings[1], S_IRUGO);
 
 static bool disable0 = 0;
 static bool disable1 = 0;
@@ -504,9 +504,9 @@ static int imx_ldb_probe(struct platform_device *pdev)
 
 	dual = of_property_read_bool(np, "fsl,dual-channel");
 
-	/* Overwrite device tree value only if bootags available and DUAL is defined */
-	property_value = (int)bootargs_get_property_value( timings0, timings_actual_size[0], "DUAL", (-1) );
-	if( (timings_actual_size[0] != 0) && (property_value >= 0 ) )
+	/* Overwrite device tree value only if bootargs available and DUAL is defined */
+	property_value = (int)bootargs_get_property_value( timings0, size_bootarg_timings[0], "DUAL", (-1) );
+	if( (size_bootarg_timings[0] != 0) && (property_value >= 0 ) )
 		dual = property_value;
 
 	if (dual)
@@ -563,12 +563,12 @@ static int imx_ldb_probe(struct platform_device *pdev)
 			channel->edid = kmemdup(edidp, channel->edid_len,
 						GFP_KERNEL);
 		} else {
-			if( timings_actual_size[i] != 0 ) { /* Get display timings from bootargs */
-				printk("LVDS(%d%s) display timings from bootargs (#%d):\n", i, dual ? "+1" : "", timings_actual_size[i] );
+			if( size_bootarg_timings[i] != 0 ) { /* Get display timings from bootargs */
+				printk("LVDS(%d%s) display timings from bootargs (#%d):\n", i, dual ? "+1" : "", size_bootarg_timings[i] );
 				if( i == 0 )
-					ret = bootargs_get_drm_display_mode(timings0, timings_actual_size[i], &channel->mode);
+					ret = bootargs_get_drm_display_mode(timings0, size_bootarg_timings[i], &channel->mode);
 				if( i == 1 )
-					ret = bootargs_get_drm_display_mode(timings1, timings_actual_size[i], &channel->mode);
+					ret = bootargs_get_drm_display_mode(timings1, size_bootarg_timings[i], &channel->mode);
 				if (!ret)
 					channel->mode_valid = 1;
 			}
