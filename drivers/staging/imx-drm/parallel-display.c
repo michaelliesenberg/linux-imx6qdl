@@ -33,8 +33,8 @@
 
 #define TIMINGS_MAX_SIZE 20
 static char *timings[TIMINGS_MAX_SIZE] = { [0 ... (TIMINGS_MAX_SIZE-1)] = NULL };
-static int timings_actual_size = 0;
-module_param_array(timings, charp, &timings_actual_size, S_IRUGO);
+static int size_bootarg_timings = 0;
+module_param_array(timings, charp, &size_bootarg_timings, S_IRUGO);
 
 static bool disable = 0;
 module_param(disable, bool, S_IRUGO);
@@ -70,10 +70,10 @@ static int imx_pd_connector_get_modes(struct drm_connector *connector)
 	int num_modes = 0;
 
 	/* Get display timings from bootargs */
-	if( timings_actual_size != 0 ) {
+	if( size_bootarg_timings != 0 ) {
 		struct drm_display_mode *mode = drm_mode_create(connector->dev);
-		printk("Parallel display timings from bootargs (#%d):\n", timings_actual_size );
-		bootargs_get_drm_display_mode(timings, timings_actual_size, &imxpd->mode);
+		printk("Parallel display timings from bootargs (#%d):\n", size_bootarg_timings );
+		bootargs_get_drm_display_mode(timings, size_bootarg_timings, &imxpd->mode);
 		drm_mode_copy(mode, &imxpd->mode);
 		mode->type |= DRM_MODE_TYPE_DRIVER | DRM_MODE_TYPE_PREFERRED,
 		drm_mode_probed_add(connector, mode);
