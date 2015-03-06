@@ -568,6 +568,12 @@ signed long bootargs_get_property_value( char **timings, int size, const char *p
 	char *separator_pos = NULL;
 	int name_len = 0;
 
+	/* Replace separator ',' with zero (termination) if it isn't done by the kernel */
+	for( index = 1; index < size; index++ ) {
+		if( *(timings[index] - 1) == ',' )
+			*(timings[index] - 1) = '\0';
+	}
+
 	for( index = 0; index < size; index++ ) {
 		separator_pos = strchr( timings[index], ':' );
 		if( separator_pos == NULL )
