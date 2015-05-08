@@ -64,6 +64,8 @@ static int imx_sgtl5000_probe(struct platform_device *pdev)
 	struct imx_sgtl5000_data *data = NULL;
 	int int_port, ext_port;
 	int ret;
+	unsigned int clk_frequency;
+
 
 	ret = of_property_read_u32(np, "mux-int-port", &int_port);
 	if (ret) {
@@ -134,6 +136,13 @@ static int imx_sgtl5000_probe(struct platform_device *pdev)
 	}
 
 	data->clk_frequency = clk_get_rate(data->codec_clk);
+
+	/* Overwrite clock frequency if defined in device tree */
+	ret = of_property_read_u32( codec_np, "clock-frequency", &clk_frequency );
+	if( !ret ) {
+		dev_info(&pdev->dev, "Set clock to %dHz (was %dHz)\n", clk_frequency, data->clk_frequency );
+		data->clk_frequency = clk_frequency;
+	}
 
 	data->dai.name = "HiFi";
 	data->dai.stream_name = "HiFi";
