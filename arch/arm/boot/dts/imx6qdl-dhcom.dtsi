@@ -83,7 +83,7 @@
 	s25fl116k@0 {							// SPI Flash: Spansion S25FL116K0PMFI010 (used to store bootloader)
 		#address-cells = <1>;
 		#size-cells = <1>;
-		compatible = "spansion,s25fl116k", "st,m25p80";
+		compatible = "spansion,s25fl116k", "m25p80";
 		spi-max-frequency = <50000000>;
 		reg = <0>;						// SS0
 		m25p,fast-read;
@@ -236,7 +236,6 @@
 				MX6QDL_PAD_EIM_D22__GPIO3_IO22    0x120B0	// USB OTG Power
 				MX6QDL_PAD_RGMII_RD2__GPIO6_IO28  0x120B0	// Touch Interrupt resistive
 				MX6QDL_PAD_RGMII_RD3__GPIO6_IO29  0x120B0	// RTC Interrupt pin (#189)
-				MX6QDL_PAD_EIM_EB2__ECSPI1_SS0    0x120B0	// CS Bootflash
 			>;
 		};
 	};
