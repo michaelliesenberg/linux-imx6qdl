@@ -23,6 +23,16 @@
 		status = "okay";
 	};
 
+	regulators {
+		reg_3p3v: 3P3V {
+			compatible = "regulator-fixed";
+			regulator-name = "3P3V";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			regulator-always-on;
+		};
+	};
+
 	display@di0 {								// Parallel display interface
 		compatible = "fsl,imx-parallel-display";
 		crtcs = <&ipu1 0>;
@@ -70,6 +80,26 @@
 			linux,code = <114>;	// KEY_VOLUMEDOWN
 		};
 	};*/
+
+	sound {
+		compatible = "fsl,imx-audio-sgtl5000";
+		model = "imx-sgtl5000";
+		ssi-controller = <&ssi1>;
+		audio-codec = <&codec>;
+		audio-routing =
+			"MIC_IN", "Mic Jack",
+			"Mic Jack", "Mic Bias",
+			"LINE_IN", "Line In Jack",
+			"Headphone Jack", "HP_OUT";
+		mux-int-port = <1>;
+		mux-ext-port = <3>;
+	};
+};
+
+&audmux {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_dhcom_audmux_ext>;				// AUD3 <-> sgtl5000
+	status = "okay";
 };
 
 &ldb {										// LVDS display interface
@@ -117,6 +147,11 @@
 	status = "okay";
 };
 
+&ssi1 {
+	fsl,mode = "i2s-slave";
+	status = "okay";
+};
+
 &ecspi1 {									// ********** SPI 1 **********
 	spidev@2 {								// ==> /dev/spidev0.2
 		compatible = "spidev";
@@ -138,6 +173,15 @@
 };
 
 &DHCOM_I2C1 {									// ********** I2C 1 **********
+	codec: sgtl5000@0a {							// Audio codec SGTL5000XNAA3/R2
+		compatible = "fsl,sgtl5000";
+		reg = <0x0a>;
+		clocks = <&clks 0>;						// DUMMY because we use external clock
+		clock-frequency = <24000000>;					// Set fixed clock frequency
+		VDDA-supply = <&reg_3p3v>;
+		VDDIO-supply = <&reg_3p3v>;
+	};
+
 	tmg120_ts@20 {								// Touch controller "DH-Touch"
 		compatible = "dh,tmg120_ts";
 		reg = <0x20>;
@@ -186,6 +230,15 @@
 				MX6QDL_PAD_SD1_CLK__GPIO1_IO20      0x400120B0  // GPIO U
 				MX6QDL_PAD_CSI0_PIXCLK__GPIO5_IO18  0x400120B0  // GPIO V
 				MX6QDL_PAD_CSI0_MCLK__GPIO5_IO19    0x400120B0  // GPIO W
+			>;
+		};
+
+		pinctrl_dhcom_audmux_ext: audmux_ext_grp { 			// HW300: Audio on external clock
+			fsl,pins = <
+				MX6QDL_PAD_CSI0_DAT7__AUD3_RXD      0x130b0
+				MX6QDL_PAD_CSI0_DAT4__AUD3_TXC      0x130b0
+				MX6QDL_PAD_CSI0_DAT5__AUD3_TXD      0x110b0
+				MX6QDL_PAD_CSI0_DAT6__AUD3_TXFS     0x130b0
 			>;
 		};
 
