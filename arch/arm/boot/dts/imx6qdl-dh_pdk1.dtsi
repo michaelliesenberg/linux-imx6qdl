@@ -80,7 +80,7 @@
 		fsl,data-width = <24>;
 		status = "okay";
 
-		// Set your LVDS display timings here 
+		// Set your LVDS display timings here
 		// To Avoid interference comment the parallel display timings out
 	/*	display-timings {						
 			// DH display ID 10
