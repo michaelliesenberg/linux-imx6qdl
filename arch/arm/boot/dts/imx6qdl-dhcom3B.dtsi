@@ -125,7 +125,7 @@
 
 		regulators {
 			sw1_reg: sw1 {						// VCC_SOC
-				regulator-min-microvolt = <787500>; 
+				regulator-min-microvolt = <787500>;
 				regulator-max-microvolt = <1527272>;
 				lltc,fb-voltage-divider = <100000 110000>;
 				regulator-suspend-mem-microvolt = <1040000>;
@@ -208,7 +208,7 @@
 };
 
 &weim {										// Memory interface is not active by default
-	status = "disable"; 
+	status = "disable";
 };
 
 &uart1 {									// UART 1 (FF)
