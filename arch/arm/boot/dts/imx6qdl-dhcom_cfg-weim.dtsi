@@ -32,8 +32,8 @@
 	#address-cells = <2>;
 	#size-cells = <1>;
 	/* it is necessary to setup 2x 64MB otherwise setting gpr fails */
-	ranges = <0 0  0x08000000  0x04000000>,					// Chip select 0 == DHCOM CS A 
-		 <1 0  0x0c000000  0x04000000>;					// Chip select 1 == DHCOM CS B 
+	ranges = <0 0  0x08000000  0x04000000>,					// Chip select 0 == DHCOM CS A
+		 <1 0  0x0c000000  0x04000000>;					// Chip select 1 == DHCOM CS B
 	fsl,weim-cs-gpr = <&gpr>;
 	status = "okay";
 

@@ -13,6 +13,6 @@
 	fsl,rs485-mode;								// Enable rs485 mode
 	rts_gpio = <&gpio7 0 0>;						// GPIO M: rs485 rts = Receive Transmit Switch GPIO
 	rxen_gpio = <&gpio7 1 0>;						// GPIO N: rs485 rxen = RX Enable GPIO
-	//rs485-rx-during-tx;							// Receive data during transfer 
+	//rs485-rx-during-tx;							// Receive data during transfer
 	status = "okay";
 };
