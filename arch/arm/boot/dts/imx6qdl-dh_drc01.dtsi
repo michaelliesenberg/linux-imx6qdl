@@ -81,6 +81,17 @@
 			linux,code = <114>;	// KEY_VOLUMEDOWN
 		};
 	};*/
+
+	clocks {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		clk_ext_spi2can: clock@1 {
+			compatible = "fixed-clock";
+			reg = <1>;
+			#clock-cells = <0>;
+			clock-frequency = <24000000>;
+		};
+	};
 };
 
 &audmux {
@@ -107,10 +118,13 @@
 };
 
 &ecspi2 {									// ********** SPI 2 **********
-	spidev@0 {								// ==> /dev/spidev1.0
-		compatible = "spidev";
+	can@0 {
+		compatible = "microchip,mcp2515";
 		reg = <0>;							// SS0
-		spi-max-frequency = <50000000>;
+		clocks = <&clk_ext_spi2can>;
+		interrupt-parent = <&gpio4>;					// Use INT_HIGHEST_PRIORITY GPIO 4.6 for interrupt
+		interrupts = <6 0x2>;
+		spi-max-frequency = <3000000>;					// MCP2515 limit is 10MHz, because of the voltage divider in MISO we use 3MHz
 		spi-cpha;							// Shifted clock phase (CPHA) mode
 		spi-cpol;							// Inverse clock polarity (CPOL) mode
 	};
