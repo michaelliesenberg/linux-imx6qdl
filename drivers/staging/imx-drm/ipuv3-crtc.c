@@ -157,7 +157,7 @@ static int ipu_crtc_mode_set(struct drm_crtc *crtc,
 		sig_cfg.Vsync_pol = 1;
 	if (mode->flags & DRM_MODE_FLAG_DE_HIGH)
 		sig_cfg.enable_pol = 1;
-	if (mode->flags & DRM_MODE_FLAG_PIXDATA_POSEDGE)
+	if (mode->flags & DRM_MODE_FLAG_PIXDATA_NEGEDGE)
 		sig_cfg.clk_pol = 1;
 
 	sig_cfg.width = mode->hdisplay;
