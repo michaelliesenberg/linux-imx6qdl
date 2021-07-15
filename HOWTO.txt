@@ -1,0 +1,7 @@
+Build linux kernel
+
+sudo ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- make imx6_dhcom_defconfig
+sudo ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- make menuconfig 
+sudo ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- make dtbs
+sudo ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- make zImage
+
